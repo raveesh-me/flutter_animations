@@ -1,83 +1,108 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
+import 'package:flutter/physics.dart';
 
-void main() => runApp(LogoApp());
-
-class LogoWidget extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.symmetric(vertical: 10),
-      child: FlutterLogo(),
-    );
-  }
+main() {
+  runApp(MyApp());
 }
 
-class GrowTransition extends StatelessWidget {
-  final Widget child;
-  final Animation<double> animation;
-
-  const GrowTransition({this.animation, this.child});
-
-
+class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    Tween<double> growValue = Tween(begin: 200, end: 500);
-    Tween<double> rotateValue = Tween(begin: pi, end: 3 * pi / 2);
-
-    return Center(
-      child: AnimatedBuilder(
-        animation: animation,
-        builder: (BuildContext context, Widget child) => Transform.rotate(
-          angle: rotateValue.evaluate(animation),
-          child: Container(
-            height: growValue.evaluate(animation),
-            width: growValue.evaluate(animation),
-            child: child,
-          ),
-        ),
-        child: child,
+    return MaterialApp(
+      home: Scaffold(
+        body: HomeScreen(),
       ),
     );
   }
 }
 
-class LogoApp extends StatefulWidget {
-  _LogoAppState createState() => _LogoAppState();
+class HomeScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return DraggableCard(
+        child: FlutterLogo(
+      size: 128,
+    ));
+  }
 }
 
-class _LogoAppState extends State<LogoApp> with SingleTickerProviderStateMixin {
-  AnimationController controller;
-  Animation<double> animation;
-  Animation curvedControl;
+class DraggableCard extends StatefulWidget {
+  final Widget child;
+
+  const DraggableCard({Key key, this.child}) : super(key: key);
+
+  @override
+  _DraggableCardState createState() => _DraggableCardState();
+}
+
+class _DraggableCardState extends State<DraggableCard>
+    with SingleTickerProviderStateMixin {
+  Widget get child => widget.child;
+  AnimationController _controller;
+
+  Animation<Alignment> animation;
+  Alignment _dragAlignment;
 
   @override
   void initState() {
     super.initState();
-    controller = AnimationController(
-      vsync: this,
-      duration: Duration(seconds: 3),
-    )
-      ..addStatusListener((status) {
-        if (status == AnimationStatus.completed)
-          controller.reverse();
-        else if (status == AnimationStatus.dismissed) controller.forward();
-      })
-      ..forward();
-    curvedControl = CurvedAnimation(
-      curve: Curves.bounceOut,
-      parent: controller,
+    _dragAlignment = Alignment.center;
+    _controller =
+        AnimationController(vsync: this, duration: Duration(seconds: 3))
+          ..addListener(() {
+            setState(() {
+              _dragAlignment = animation.value;
+            });
+          });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  runAnimation(DragEndDetails details, Size size) {
+    animation = CurvedAnimation(parent: _controller, curve: Curves.bounceOut)
+        .drive(AlignmentTween(end: Alignment.center, begin: _dragAlignment));
+
+    final pixelsPerSecond = details.velocity.pixelsPerSecond;
+    final speedUnitX = pixelsPerSecond.dx / size.width;
+    final speedUnitY = pixelsPerSecond.dy / size.height;
+    final speedUnit = Offset(speedUnitX, speedUnitY).distance;
+
+    const spring = SpringDescription(
+      damping: 0.3,
+      mass: 5,
+      stiffness: 0.2,
     );
+
+    final simulation = SpringSimulation(spring, 1, 1, speedUnit);
+    _controller.reset();
+    _controller.fling(velocity: speedUnit);
+
   }
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        body: GrowTransition(
-          animation: curvedControl,
-          child: LogoWidget(),
+    Size size = MediaQuery.of(context).size;
+    return GestureDetector(
+      onPanDown: (details) {},
+      onPanUpdate: (details) {
+        setState(() {
+          _dragAlignment += Alignment(
+            details.delta.dx / (size.width / 2),
+            details.delta.dy / (size.height / 2),
+          );
+        });
+      },
+      onPanEnd: (DragEndDetails details) {
+        runAnimation(details, size);
+      },
+      child: Align(
+        alignment: _dragAlignment,
+        child: Card(
+          child: widget.child,
         ),
       ),
     );

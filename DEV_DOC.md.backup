@@ -1,13 +1,14 @@
 - [x] Animation Basics
 	- [x] Tween
-	- [x ] AnimatedWidget
-	- [ x] AnimatedBuilder
-	- [ x] AnimationController
-	- [ x] CurvedAnimation
-	- [ x] Simultaneous Animation
-	- [ x] Transform
-	- [ ] Curves
-	- [ ] Curve.flipped
+	- [x] AnimatedWidget
+	- [x] AnimatedBuilder
+	- [x] AnimationController
+	- [x] CurvedAnimation
+	- [x] Simultaneous Animation
+	- [x] Transform
+	- [x] Curves
+	- [x] Curve.flipped
+	- [x] ReverseAnimation
 	- [ ] 
 - [ ] Implicit Animation Widgets
 - [ ] Animations Package
