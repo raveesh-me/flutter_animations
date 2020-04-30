@@ -2,11 +2,44 @@ import 'package:flutter/material.dart';
 
 void main() => runApp(LogoApp());
 
+class LogoWidget extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 10),
+      child: FlutterLogo(),
+    );
+  }
+}
+
+class GrowTransition extends StatelessWidget {
+  final Widget child;
+  final Animation<double> animation;
+
+  const GrowTransition({this.animation, this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: AnimatedBuilder(
+        animation: animation,
+        builder: (BuildContext context, Widget child) =>
+            Container(
+              height: animation.value,
+              width: animation.value,
+              child: child,
+            ),
+        child: child,
+      ),
+    );
+  }
+}
+
 class LogoApp extends StatefulWidget {
   _LogoAppState createState() => _LogoAppState();
 }
 
-class _LogoAppState extends State<LogoApp> with SingleTickerProviderStateMixin {
+class _LogoAppState extends State<LogoApp> with SingleTickerProviderStateMixin{
   AnimationController controller;
   Animation<double> animation;
 
@@ -18,11 +51,6 @@ class _LogoAppState extends State<LogoApp> with SingleTickerProviderStateMixin {
       duration: Duration(milliseconds: 500),
       reverseDuration: Duration(seconds: 2),
     )
-      ..addListener(
-        () {
-          setState(() {});
-        },
-      )
       ..addStatusListener((status) {
         if (status == AnimationStatus.completed)
           controller.reverse();
@@ -35,31 +63,12 @@ class _LogoAppState extends State<LogoApp> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatingLogo(
-      animation: animation,
-    );
-  }
-}
-
-class AnimatingLogo extends AnimatedWidget {
-  final Animation animation;
-
-  AnimatingLogo({Key key, @required this.animation})
-      : super(key: key, listenable: animation);
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Transform(
-        transform: Matrix4.translationValues(
-            animation.value * (-1), animation.value, animation.value / 10),
-        child: Container(
-          margin: EdgeInsets.symmetric(vertical: 10),
-          height: animation.value,
-          width: animation.value,
-          child: FlutterLogo(),
+    return MaterialApp(
+      home: Scaffold(
+        body: GrowTransition(
+        animation: animation,
+        child: LogoWidget(),
         ),
-      ),
-    );
+    ),);
   }
 }
