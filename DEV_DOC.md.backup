@@ -1,4 +1,16 @@
-- [ ] Animation Basics
+- [x] Animation Basics
+	- [x] Tween
+	- [x ] AnimatedWidget
+	- [ x] AnimatedBuilder
+	- [ x] AnimationController
+	- [ x] CurvedAnimation
+	- [ x] Simultaneous Animation
+	- [ x] Transform
+	- [ ] Curves
+	- [ ] Curve.flipped
+	- [ ] 
 - [ ] Implicit Animation Widgets
 - [ ] Animations Package
-- [ ] 
+- [ ] SVG Animations
+- [ ] Custom Painter Animation
+
